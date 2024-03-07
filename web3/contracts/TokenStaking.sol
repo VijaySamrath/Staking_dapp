@@ -308,4 +308,7 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
         return(userReward, currentTime)
     }
 
+    function getCurrentTime() internal view returns(uint264) {
+        return block.timestamp;
+    }
 }
