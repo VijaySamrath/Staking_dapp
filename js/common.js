@@ -114,5 +114,38 @@ function formatEthErrorMsg(error) {
         var eFrom = error.message.indexOf("{");
         var eTo = error.message.lastIndexOf("}");
         var eM1 = error.message.indexOf("TokenStaking:");
-    }
+        var eM2 = error.message.indexOf("ERC20 : ");
+        var eM4 = error.message.indexOf("Internal JSON-RPC error");
+
+        if (eFrom != -1 && eTo != -1 && (eM1 != -1 || eM2 != -1)) {
+            var eMsgTemp = JSON.parse(error.message.substr(eFrom, eTo));
+            var eMsg = eM4 != -1 ? eMsgTemp.message : eMsgTemp.originalError.message;
+            
+            if (eM1 != -1) {
+                return eMsg.split("TokenStaking: ")[1];
+            } else {
+                return eMsg.split("ERC20: ")[1];
+            }
+            } else {
+                return error.message;
+            }
+        }catch (e) {
+            console.log(e);
+            return "Something is wrong!";
+        }
+    
 }
+
+function getSelectedTab(sClass) {
+    console.log(sClass);
+    return sClass || contractCall;
+}
+
+function getContractObj(sClass) {
+    return new web3.eth.Contract(
+        SELECT_CONTRACT[_NETWORK_ID].STACKING.abi,
+        SELECT_CONTRACT[_NETWORK_ID].STACKING[sClass].address
+    );
+}
+
+
