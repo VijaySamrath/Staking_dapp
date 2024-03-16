@@ -4,18 +4,18 @@ pragma solidity ^0.8.9;
 
 import "./Address.sol";
 
-abstract contract Intializable {
+abstract contract Initializable {
 
-    uint8 private _inittialized;
+    uint8 private _initialized;
 
     bool private _initializing;
 
-    event Intialized(uint8 version);
+    event Initialized(uint8 version);
 
     modifier initializer() {
-        bool isTopLevel = !_initializing;
+        bool isTopLevelCall = !_initializing;
         require(
-            (isTopLevelCall && _inittialized < 1) || (!Address.isContract(address(this)) && _initialized == 1),
+            (isTopLevelCall && _initialized < 1) || (!Address.isContract(address(this)) && _initialized == 1),
             "Initializable: contract is already initialized"
         );
         _initialized = 1;
@@ -25,8 +25,9 @@ abstract contract Intializable {
         _;
         if (isTopLevelCall){
             _initializing = false;
-            emit initialized(1);
+            emit Initialized(1);
         }
+        _;
     }
 
     modifier reinitializer(uint8 version) {
@@ -35,14 +36,15 @@ abstract contract Intializable {
         _initializing = true;
         _;
         _initializing = false;
-        emit initialized(version);
+        emit Initialized(version);
     }
 
     modifier onlyInitializing() {
         require(_initializing, "Initializable: contract is not initializing");
+        _;
     }
 
-    function _disableInitializers() internal view {
+    function _disableInitializers() internal virtual {
         require(!_initializing, "Initializable: contract is not initializing");
         if (_initialized < type(uint8).max) {
             _initialized = type(uint8).max;

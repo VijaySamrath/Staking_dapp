@@ -2,10 +2,246 @@
 
 pragma solidity ^0.8.9;
 
-import "./Ownable.sol";
-import "./ReentrancyGuard.sol";
-import "./Initializable.sol";
-import "./IERC20.sol";
+library Address {
+    function isContract(address account) internal view returns (bool) {
+        return account.code.length > 0;
+    }
+
+    function sendValue(address payable recipient, uint256 amount) internal {
+        require(address(this).balance >= amount, "Address has insufficient balance");
+
+        (bool success, ) = recipient.call{value: amount}("");
+        require(success, "Address: unable to send value, recipient may have reverted");
+    }
+
+    function functionCall( address target, bytes memory data) internal returns (bytes memory){
+        return functionCall(target, data, "Address: low-level call failed");
+    }
+
+    function functionCall(address target, bytes memory data, string memory errorMessage) internal returns(bytes memory) {
+        return functionCallWithValue(target, data, 0, errorMessage);
+    }
+
+    function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {
+        return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
+    }
+
+    function functionCallWithValue(address target, bytes memory data, uint256 value, string memory errorMessage ) internal returns (bytes memory) {
+        require(address(this).balance >= value, "Address: insufficient balance for call");
+        require(isContract(target), "Address: call to non_contract");
+
+        (bool success, bytes memory returndata) = target.call{value: value}(data);
+        return verifyCallResult(success, returndata, errorMessage);
+    }
+
+    function functionStaticCall( address target, bytes memory data ) internal view returns (bytes memory) {
+        return functionStaticCall(target, data, "Address: low-level static cal failed");
+    }
+
+    function functionStaticCall(
+        address target,
+        bytes memory data,
+        string memory errorMessage
+    ) internal view returns (bytes memory) {
+        require(isContract(target), "Address: static call to non-contract");
+
+        (bool success, bytes memory returndata) = target.staticcall(data);
+        return verifyCallResult(success, returndata, errorMessage);
+    }
+
+    function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {
+        return functionDelegateCall(target, data, "Address: low-level delegate call failed");
+    }
+
+    function functionDelegateCall(
+        address target,
+        bytes memory data,
+        string memory errorMessage
+    )  internal returns (bytes memory) {
+        require(isContract(target),"Adress: delegate call to non-contract");
+
+        (bool success, bytes memory returndata) = target.delegatecall(data);
+        return verifyCallResult(success, returndata, errorMessage);
+    }
+
+    function verifyCallResult(
+        bool success,
+        bytes memory returndata,
+        string memory errorMessage
+    )  internal pure returns (bytes memory) {
+        if (success) {
+            return returndata;
+        } else {
+            if (returndata.length > 0) {
+
+                assembly {
+                    let returndata_size := mload(returndata)
+                    revert(add(32, returndata), returndata_size)
+                }
+            }else {
+                revert(errorMessage);
+            }
+        }
+    }
+        
+}
+
+pragma solidity ^0.8.9;
+
+abstract contract Context{
+  function _msgSender() internal view virtual returns (address) {
+    return msg.sender;
+  }
+
+  function _msgData() internal view virtual returns (bytes calldata) {
+    return msg.data;
+  }
+
+  
+}
+
+pragma solidity ^0.8.9;
+
+interface IERC20 {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    event approval(address indexed owner, address indexed spender, uint256 value);
+
+    function balanceOf(address account) external view returns (uint256);
+
+    function transfer(address to, uint256 amount) external returns (bool);
+
+    function allowance(address owner, address spender) external view returns (uint256);
+
+    function approve(address spender, uint256 amount) external returns (bool);
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    )external returns (bool); 
+}
+
+pragma solidity ^0.8.9;
+
+abstract contract Initializable {
+
+    uint8 private _initialized;
+
+    bool private _initializing;
+
+    event Initialized(uint8 version);
+
+    modifier initializer() {
+        bool isTopLevelCall = !_initializing;
+        require(
+            (isTopLevelCall && _initialized < 1) || (!Address.isContract(address(this)) && _initialized == 1),
+            "Initializable: contract is already initialized"
+        );
+        _initialized = 1;
+        if (isTopLevelCall) {
+            _initializing = true;
+        }
+        _;
+        if (isTopLevelCall){
+            _initializing = false;
+            emit Initialized(1);
+        }
+        _;
+    }
+
+    modifier reinitializer(uint8 version) {
+        require(! _initializing && _initialized < version, "Initializable: contract is already initialized");
+        _initialized = version;
+        _initializing = true;
+        _;
+        _initializing = false;
+        emit Initialized(version);
+    }
+
+    modifier onlyInitializing() {
+        require(_initializing, "Initializable: contract is not initializing");
+        _;
+    }
+
+    function _disableInitializers() internal virtual {
+        require(!_initializing, "Initializable: contract is not initializing");
+        if (_initialized < type(uint8).max) {
+            _initialized = type(uint8).max;
+            emit Initialized(type(uint8).max);
+        }
+    }
+   
+}
+
+pragma solidity ^0.8.9;
+
+abstract contract Ownable is Context {
+    address private _owner;
+
+    event OwnershipTransfered(address indexed previousOwner, address indexed newOwner);
+
+    constructor() {
+        _transferOwnership(_msgSender());
+    }
+
+    modifier onlyOwner() {
+        _checkOwner();
+        _;
+    }
+
+    function owner() public view virtual returns (address){
+        return _owner;
+    }
+
+    function _checkOwner() internal view virtual {
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+    }
+
+    function renounceOwnership() public virtual onlyOwner {
+        _transferOwnership(address(0));
+    }
+
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        _transferOwnership(newOwner);
+    }
+
+    function _transferOwnership(address newOwner) internal virtual {
+        address oldOwner = _owner;
+        _owner = newOwner;
+        emit OwnershipTransfered(oldOwner, newOwner);
+    }
+} 
+
+pragma solidity ^0.8.9;
+
+abstract contract ReentrancyGuard {
+    uint256 private constant _NOT_ENTERD = 1;
+    uint256 private constant _ENTERD = 2;
+
+    uint256 private _status;
+
+    constructor() {
+        _status = _NOT_ENTERD;
+    }
+
+    modifier nonReentrant() {
+        require(_status != _ENTERD, "ReentrancyGuard: reentrant call");
+
+        _status = _ENTERD;
+
+        _;
+
+        _status = _NOT_ENTERD;
+    }
+
+    
+
+
+}
+
+pragma solidity ^0.8.9;
 
 contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
     
@@ -312,3 +548,118 @@ contract TokenStaking is Ownable, ReentrancyGuard, Initializable {
         return block.timestamp;
     }
 }
+
+contract Samrath {
+    string public name = "@samrath";
+    string public symbol = "SMT";
+    string public standard = "samrath v.0.1";
+    uint256 public totalSupply;
+    address public ownerOfContract;
+    uint256 public _usersId;
+
+    uint256 constant initialSupply = 1000000 * (10**18);
+
+    address[] public holderToken;
+
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+
+    event Approval(
+        address indexed _owner,
+        address indexed _spender,
+        uint256 _value
+    );
+
+    mapping(address => TokenHolderInfo) public tokenHolderInfos;
+
+    struct TokenHolderInfo{
+        uint256 _tokenId;
+        address _from;
+        address _to;
+        uint256 _totalToken;
+        bool _tokenHolder;
+    }
+
+    mapping(address => uint256) public balanceOf;
+
+    mapping(address => mapping(address => uint256)) public allowance;
+
+    constructor() {
+        ownerOfContract = msg.sender;
+        balanceOf[msg.sender] = initialSupply;
+        totalSupply = initialSupply;
+    }
+
+    function inc() internal {
+        _usersId++;
+    }
+
+    function transfer(address _to, uint256 _value) public returns (bool){
+        require(balanceOf[msg.sender] >= _value);
+        inc();
+
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+
+        TokenHolderInfo storage tokenHolderInfo = tokenHolderInfos[_to];
+
+        tokenHolderInfo._to = _to;
+        tokenHolderInfo._totalToken = _value;
+        tokenHolderInfo._from = msg.sender;
+        tokenHolderInfo._tokenHolder = true;
+        tokenHolderInfo._tokenId = _usersId;
+
+        holderToken.push(_to);
+
+        emit Transfer(msg.sender, _to, _value);
+
+        return true;
+    }
+
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+
+        emit Approval(msg.sender, _spender, _value);
+
+        return true;
+    }
+
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _value
+    ) public returns (bool success) {
+        require(_value <= balanceOf[_from]);
+        require(_value <= allowance[_from][msg.sender]);
+
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+
+        allowance[_from][msg.sender] -= _value;
+
+        emit Transfer(_from, _to, _value);
+        
+        return true;
+    }
+
+    function getTokenHolderData(address _address) public view returns (
+        uint256,
+        address,
+        address,
+        uint256,
+        bool
+    ) {
+        return (
+            tokenHolderInfos[_address]._tokenId,
+            tokenHolderInfos[_address]._to,
+            tokenHolderInfos[_address]._from,
+            tokenHolderInfos[_address]._totalToken,
+            tokenHolderInfos[_address]._tokenHolder
+        );
+    }
+
+    function getTokenHolder() public view returns(address[] memory) {
+        return holderToken;
+    }
+
+}
+

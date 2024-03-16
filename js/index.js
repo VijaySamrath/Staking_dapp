@@ -11,7 +11,7 @@ function openTab(event, name) {
     loadInitialData(name);
 }
 
-async function  loadInitialData(sClass) {
+async function loadInitialData(sClass) {
     console.log(sClass);
     try {
         clearInterval(countDownGlobal);
@@ -51,7 +51,7 @@ async function  loadInitialData(sClass) {
 
         //Class ELEMENT DATA 
         let totalLockedTokens = await cObj.methods.getTotalStakedTokens().call();
-        let earlyUNstakeFee = await cObj.methods.getEarlyUnstakeFeePercentage().call();
+        let earlyUnstakeFee = await cObj.methods.getEarlyUnstakeFeePercentage().call();
 
         //ELEMENT --CLASS
         document.getElementById("total-locked-tokens-value").innerHTML = `${
@@ -84,7 +84,7 @@ async function  loadInitialData(sClass) {
           document
             .querySelectorAll(".Maximum-Staking-Amount")
             .forEach(function (element) {
-               element.innerHTML = `${(0000000).toLocaleString()} ${
+               element.innerHTML = `${(0o000).toLocaleString()} ${
                 SEELECT_CONTRACT[_NETWORK_ID].TOKEN.symbol
                }`;
             });
@@ -386,7 +386,7 @@ async function stackTokenMain(_amount_wei, sClass) {
     })
     .on("transactionHash", (hash) => {
         console.log("TRansaction Hash:", hash);
-    });
+    })
 
     .catch((error) => {
         console.log(error);
@@ -504,7 +504,7 @@ async function unstackTokenMain(_amount_wei, oContractStacking, sClass) {
 }
 
 
-async function claimToken()
+async function claimTokens()
  {
     try {
         let sClass = getSelectedTab(contractCall);

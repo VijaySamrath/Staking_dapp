@@ -42,7 +42,7 @@ library Address {
         address target,
         bytes memory data,
         string memory errorMessage
-    ) internal view reurns (bytes memory) {
+    ) internal view returns (bytes memory) {
         require(isContract(target), "Address: static call to non-contract");
 
         (bool success, bytes memory returndata) = target.staticcall(data);
@@ -57,7 +57,7 @@ library Address {
         address target,
         bytes memory data,
         string memory errorMessage
-    )  internsl returns (bytes memory) {
+    )  internal returns (bytes memory) {
         require(isContract(target),"Adress: delegate call to non-contract");
 
         (bool success, bytes memory returndata) = target.delegatecall(data);
@@ -66,7 +66,7 @@ library Address {
 
     function verifyCallResult(
         bool success,
-        bytes memory data,
+        bytes memory returndata,
         string memory errorMessage
     )  internal pure returns (bytes memory) {
         if (success) {

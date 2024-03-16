@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.9;
 
-contract TheblockchainCoders {
-    string public name = "@theblockchaincoders";
-    string public symbol = "TBC";
-    string public standard = "theblockchaincoders v.0.1";
+contract Samrath {
+    string public name = "@samrath";
+    string public symbol = "SMT";
+    string public standard = "samrath v.0.1";
     uint256 public totalSupply;
     address public ownerOfContract;
     uint256 public _usersId;
@@ -39,7 +39,7 @@ contract TheblockchainCoders {
     constructor() {
         ownerOfContract = msg.sender;
         balanceOf[msg.sender] = initialSupply;
-        totalSupply = initialSupply
+        totalSupply = initialSupply;
     }
 
     function inc() internal {
@@ -51,7 +51,7 @@ contract TheblockchainCoders {
         inc();
 
         balanceOf[msg.sender] -= _value;
-        balnceOf[_to] += _value;
+        balanceOf[_to] += _value;
 
         TokenHolderInfo storage tokenHolderInfo = tokenHolderInfos[_to];
 
@@ -71,7 +71,7 @@ contract TheblockchainCoders {
     function approve(address _spender, uint256 _value) public returns (bool success) {
         allowance[msg.sender][_spender] = _value;
 
-        emit Approval[msg.sender, _spender, _value];
+        emit Approval(msg.sender, _spender, _value);
 
         return true;
     }
@@ -81,8 +81,8 @@ contract TheblockchainCoders {
         address _to,
         uint256 _value
     ) public returns (bool success) {
-        require(_value <= balnceOf[_from]);
-        require(_value <= allownace[_from][msg.sender]);
+        require(_value <= balanceOf[_from]);
+        require(_value <= allowance[_from][msg.sender]);
 
         balanceOf[_from] -= _value;
         balanceOf[_to] += _value;
